@@ -7,6 +7,7 @@ use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
 use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Services\IIdProvider;
+use App\Application\Ports\Services\IUserProvider;
 use App\Domain\Entity\House;
 use App\Domain\Entity\Reservation;
 use PHPUnit\Framework\TestCase;
@@ -53,15 +54,45 @@ class HouseRepository implements IHouseRepository {
   }
 }
 
+class AuthenticatedUser {
+  private string $id;
+
+  public function __construct(string $id) {
+    $this->id = $id;
+  }
+
+  public function getId() : string {
+    return $this->id;
+  }
+}
+
+class AuthenticatedUserProvider implements IUserProvider {
+  private AuthenticatedUser $user;
+
+  public function __construct(AuthenticatedUser $user) {
+    $this->user = $user;
+  }
+
+  public function getUser() : AuthenticatedUser {
+    return $this->user;
+  }
+}
+
 class ReserveHouseTest extends TestCase {
+  private AuthenticatedUser $user;
+
   private IdProvider $idProvider;
+  private AuthenticatedUserProvider $userProvider;
   private ReservationRepository $reservationRepository;
   private HouseRepository $houseRepository;
 
   private ReserveHouseCommandHandler $commandHandler;
 
   protected function setUp(): void {
+    $this->user = new AuthenticatedUser("user-id");
+
     $this->idProvider = new IdProvider("reservation-id");
+    $this->userProvider = new AuthenticatedUserProvider($this->user);
     $this->reservationRepository = new ReservationRepository();
     $this->houseRepository = new HouseRepository([
       new House("house-id")
@@ -70,7 +101,8 @@ class ReserveHouseTest extends TestCase {
     $this->commandHandler = new ReserveHouseCommandHandler(
       $this->idProvider,
       $this->reservationRepository,
-      $this->houseRepository
+      $this->houseRepository,
+      $this->userProvider
     );
   }
 
@@ -90,6 +122,7 @@ class ReserveHouseTest extends TestCase {
     $this->assertEquals("2024-01-01", $reservation->getStartDate()->format("Y-m-d"));
     $this->assertEquals("2024-01-02", $reservation->getEndDate()->format("Y-m-d"));
     $this->assertEquals("house-id", $reservation->getHouseId());
+    $this->assertEquals("user-id", $reservation->getTenantId());
   }
 
   public function test_whenHouseNotDefined_shouldFail() {

@@ -9,13 +9,16 @@ class Reservation {
 
   private string $houseId;
 
+  private string $tenantId;
+
   private DateTime $startDate;
 
   private DateTime $endDate;
 
-  public function __construct(string $id, string $houseId, DateTime $startDate, DateTime $endDate) {
+  public function __construct(string $id, string $houseId, string $tenantId, DateTime $startDate, DateTime $endDate) {
     $this->id = $id;
     $this->houseId = $houseId;
+    $this->tenantId = $tenantId;
     $this->startDate = $startDate;
     $this->endDate = $endDate;
   }
@@ -24,15 +27,19 @@ class Reservation {
     return $this->id;
   }
 
+  public function getHouseId(): string {
+    return $this->houseId;
+  }
+
+  public function getTenantId(): string {
+    return $this->tenantId;
+  }
+
   public function getStartDate(): DateTime {
     return $this->startDate;
   }
 
   public function getEndDate(): DateTime {
     return $this->endDate;
-  }
-
-  public function getHouseId(): string {
-    return $this->houseId;
   }
 }
