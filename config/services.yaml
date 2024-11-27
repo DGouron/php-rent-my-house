@@ -22,5 +22,5 @@ services:
 
     App\Application\Ports\Services\IIdProvider: '@App\Infrastructure\ForProduction\Services\RandomIdProvider'
     App\Application\Ports\Services\IUserProvider: '@App\Infrastructure\ForProduction\Services\WebAuthenticatedUserProvider'
-    App\Application\Ports\Repositories\IHouseRepository: '@App\Infrastructure\ForTests\Repositories\RamHouseRepository'
-    App\Application\Ports\Repositories\IReservationRepository: '@App\Infrastructure\ForTests\Repositories\RamReservationRepository'
+    App\Application\Ports\Repositories\IHouseRepository: '@App\Infrastructure\ForProduction\Repository\SqlHouseRepository'
+    App\Application\Ports\Repositories\IReservationRepository: '@App\Infrastructure\ForProduction\Repository\SqlReservationRepository'
