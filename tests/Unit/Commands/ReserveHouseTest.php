@@ -93,14 +93,17 @@ class ReserveHouseTest extends TestCase {
   }
 
   public function test_whenHouseNotDefined_shouldFail() {
-    $this->expectException(\Exception::class);
-
     $command = new ReserveHouseCommand(
       "not-found-id",
       "2024-01-01",
       "2024-01-02"
     );
 
-    $this->commandHandler->execute($command);
+    try {
+      $this->commandHandler->execute($command);
+      $this->fail("The house should exist");
+    } catch (\Exception $e) {
+      $this->assertEquals("House not found", $e->getMessage());
+    }
   }
 }
