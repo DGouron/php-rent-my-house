@@ -2,7 +2,7 @@
 
 namespace App\Application\Ports\Services;
 
-use App\Tests\Unit\Commands\AuthenticatedUser;
+use App\Domain\Model\AuthenticatedUser;
 
 interface IUserProvider {
   public function getUser(): AuthenticatedUser;
