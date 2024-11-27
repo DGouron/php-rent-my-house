@@ -4,8 +4,10 @@ namespace App\Tests\Unit\Commands;
 
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
+use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Services\IIdProvider;
+use App\Domain\Entity\House;
 use App\Domain\Entity\Reservation;
 use PHPUnit\Framework\TestCase;
 
@@ -33,19 +35,72 @@ class ReservationRepository implements IReservationRepository {
   }
 }
 
+class HouseRepository implements IHouseRepository {
+  private array $database = [];
+
+  public function __construct(array $database = []) {
+    $this->database = $database;
+  }
+
+  public function findById(string $id): ?House {
+    foreach ($this->database as $house) {
+      if ($house->getId() === $id) {
+        return $house;
+      }
+    }
+
+    return null;
+  }
+}
+
 class ReserveHouseTest extends TestCase {
+  private IdProvider $idProvider;
+  private ReservationRepository $reservationRepository;
+  private HouseRepository $houseRepository;
+
+  private ReserveHouseCommandHandler $commandHandler;
+
+  protected function setUp(): void {
+    $this->idProvider = new IdProvider("reservation-id");
+    $this->reservationRepository = new ReservationRepository();
+    $this->houseRepository = new HouseRepository([
+      new House("house-id")
+    ]);
+
+    $this->commandHandler = new ReserveHouseCommandHandler(
+      $this->idProvider,
+      $this->reservationRepository,
+      $this->houseRepository
+    );
+  }
+
   public function test_happyPath_shouldCreateReservation() {
-    $repository = new ReservationRepository();
-    $idProvider = new IdProvider("reservation-id");
+    $response = $this->commandHandler->execute(
+      new ReserveHouseCommand(
+        "house-id",
+        "2024-01-01",
+        "2024-01-02"
+      )
+    );
 
-    $commandHandler = new ReserveHouseCommandHandler($idProvider, $repository);
-    $response = $commandHandler->execute(new ReserveHouseCommand("2024-01-01", "2024-01-02"));
-
-    $reservation = $repository->findById($response->getId());
+    $reservation = $this->reservationRepository->findById($response->getId());
 
     $this->assertNotNull($reservation);
     $this->assertEquals($response->getId(), $reservation->getId());
     $this->assertEquals("2024-01-01", $reservation->getStartDate()->format("Y-m-d"));
     $this->assertEquals("2024-01-02", $reservation->getEndDate()->format("Y-m-d"));
+    $this->assertEquals("house-id", $reservation->getHouseId());
+  }
+
+  public function test_whenHouseNotDefined_shouldFail() {
+    $this->expectException(\Exception::class);
+
+    $command = new ReserveHouseCommand(
+      "not-found-id",
+      "2024-01-01",
+      "2024-01-02"
+    );
+
+    $this->commandHandler->execute($command);
   }
 }

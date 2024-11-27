@@ -2,6 +2,7 @@
 
 namespace App\Application\Commands\ReserveHouse;
 
+use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Services\IIdProvider;
 use App\Domain\Entity\Reservation;
@@ -11,15 +12,23 @@ use DateTime;
 class ReserveHouseCommandHandler {
   private IIdProvider $idProvider;
   private IReservationRepository $repository;
+  private IHouseRepository $houseRepository;
 
-  public function __construct(IIdProvider $idProvider, IReservationRepository $repository) {
+  public function __construct(IIdProvider $idProvider, IReservationRepository $repository, IHouseRepository $houseRepository) {
     $this->idProvider = $idProvider;
     $this->repository = $repository;
+    $this->houseRepository = $houseRepository;
   }
 
   public function execute(ReserveHouseCommand $command) {
+    $house = $this->houseRepository->findById($command->getHouseId());
+    if (!$house) {
+      throw new \Exception("House not found");
+    }
+
     $reservation = new Reservation(
       $this->idProvider->getId(),
+      $command->getHouseId(),
       DateTime::createFromFormat("Y-m-d", $command->getStartDate()),
       DateTime::createFromFormat("Y-m-d", $command->getEndDate())
     );

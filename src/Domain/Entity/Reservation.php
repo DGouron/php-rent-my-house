@@ -7,12 +7,15 @@ use DateTime;
 class Reservation {
   private string $id;
 
+  private string $houseId;
+
   private DateTime $startDate;
 
   private DateTime $endDate;
 
-  public function __construct(string $id, DateTime $startDate, DateTime $endDate) {
+  public function __construct(string $id, string $houseId, DateTime $startDate, DateTime $endDate) {
     $this->id = $id;
+    $this->houseId = $houseId;
     $this->startDate = $startDate;
     $this->endDate = $endDate;
   }
@@ -27,5 +30,9 @@ class Reservation {
 
   public function getEndDate(): DateTime {
     return $this->endDate;
+  }
+
+  public function getHouseId(): string {
+    return $this->houseId;
   }
 }
