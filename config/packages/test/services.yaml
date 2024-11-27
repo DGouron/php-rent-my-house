@@ -1,0 +1,2 @@
+parameters:
+  'doctrine.dbal.connection_factory.class': App\Infrastructure\ForTests\TestConnectionFactory

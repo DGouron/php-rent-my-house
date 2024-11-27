@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Unit\Commands;
+namespace App\Tests\Suites\Unit\Commands;
 
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
