@@ -21,4 +21,8 @@ class RamHouseRepository implements IHouseRepository {
 
     return null;
   }
+
+  public function save(House $house): void {
+    $this->database[] = $house;
+  }
 }

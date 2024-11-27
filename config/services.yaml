@@ -16,9 +16,11 @@ services:
     App\:
         resource: '../src/'
         exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Infrastructure/ForTests/Services/**/*'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+
+    App\Application\Ports\Services\IIdProvider: '@App\Infrastructure\ForProduction\Services\RandomIdProvider'
+    App\Application\Ports\Services\IUserProvider: '@App\Infrastructure\ForProduction\Services\WebAuthenticatedUserProvider'
+    App\Application\Ports\Repositories\IHouseRepository: '@App\Infrastructure\ForTests\Repositories\RamHouseRepository'
+    App\Application\Ports\Repositories\IReservationRepository: '@App\Infrastructure\ForTests\Repositories\RamReservationRepository'
