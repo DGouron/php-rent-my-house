@@ -4,6 +4,7 @@ namespace App\Tests\Suites\Unit\Commands;
 
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
+use App\Application\Exception\NotFoundException;
 use App\Domain\Entity\House;
 use App\Domain\Model\AuthenticatedUser;
 use App\Infrastructure\ForTests\Repositories\RamHouseRepository;
@@ -70,6 +71,7 @@ class ReserveHouseTest extends TestCase {
       $this->commandHandler->execute($command);
       $this->fail("The house should exist");
     } catch (\Exception $e) {
+      $this->assertInstanceOf(NotFoundException::class, $e);
       $this->assertEquals("House not found", $e->getMessage());
     }
   }

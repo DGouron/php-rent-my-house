@@ -2,6 +2,7 @@
 
 namespace App\Application\Commands\ReserveHouse;
 
+use App\Application\Exception\NotFoundException;
 use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Services\IIdProvider;
@@ -9,6 +10,7 @@ use App\Application\Ports\Services\IUserProvider;
 use App\Domain\Entity\Reservation;
 use App\Domain\ViewModel\IdViewModel;
 use DateTime;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ReserveHouseCommandHandler {
   private IIdProvider $idProvider;
@@ -26,7 +28,7 @@ class ReserveHouseCommandHandler {
   public function execute(ReserveHouseCommand $command) {
     $house = $this->houseRepository->findById($command->getHouseId());
     if (!$house) {
-      throw new \Exception("House not found");
+      throw new NotFoundException("House not found");
     }
 
     $reservation = new Reservation(

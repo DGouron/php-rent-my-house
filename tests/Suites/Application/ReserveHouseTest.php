@@ -56,4 +56,39 @@ class ReserveHouseTest extends ApplicationTestCase {
     $this->assertEquals("2022-01-01", $reservation->getStartDate()->format('Y-m-d'));
     $this->assertEquals("2022-01-02", $reservation->getEndDate()->format('Y-m-d'));
   }
+
+  public function test_houseNotFound() {
+    $client = self::initialize();
+
+    $user = new User();
+    $user->setId("user-id");
+    $user->setEmailAddress("johndoe@gmail.com");
+    $user->setPassword("azerty");
+
+    $passwordHasher = self::getContainer()->get(UserPasswordHasherInterface::class);
+    $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
+
+    /** @var IUserRepository $userRepository */
+    $userRepository = self::getContainer()->get(IUserRepository::class);
+    $userRepository->save($user);
+
+    $client->loginUser($user);
+
+    /** @var IHouseRepository $houseRepository */
+    $houseRepository = self::getContainer()->get(IHouseRepository::class);
+    $houseRepository->save(new House("house-id"));
+
+    $this->request('POST', '/api/reserve-house', [
+      'houseId' => 'not-found-id',
+      'startDate' => '2022-01-01',
+      'endDate' => '2022-01-02',
+    ]);
+
+    $this->assertResponseStatusCodeSame(404);
+
+    $response = $client->getResponse();
+    $data = json_decode($response->getContent(), true);
+
+    $this->assertEquals("House not found", $data['message']);
+  }
 }
