@@ -6,6 +6,7 @@ use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Domain\Entity\House;
 use App\Tests\Infrastructure\ApplicationTestCase;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ReserveHouseTest extends ApplicationTestCase {
   public function test_happyPath() {
@@ -15,11 +16,11 @@ class ReserveHouseTest extends ApplicationTestCase {
     $houseRepository = self::getContainer()->get(IHouseRepository::class);
     $houseRepository->save(new House("house-id"));
 
-    $client->request('POST', '/api/reserve-house', [], [], [], json_encode([
-      'houseId' => 'house-id',
-      'startDate' => '2022-01-01',
-      'endDate' => '2022-01-02',
-    ]));
+   $this->request('POST', '/api/reserve-house', [
+     'houseId' => 'house-id',
+     'startDate' => '2022-01-01',
+     'endDate' => '2022-01-02',
+   ]);
 
     $this->assertResponseStatusCodeSame(200);
 

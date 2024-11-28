@@ -2,6 +2,7 @@
 
 namespace App\Tests\Infrastructure;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -26,5 +27,16 @@ class ApplicationTestCase extends WebTestCase {
     $schemaTool->createSchema($metadata);
 
     return self::$client;
+  }
+
+  protected function afterRequest() {
+    /** @var EntityManagerInterface $doctrine */
+    $doctrine = self::getContainer()->get(EntityManagerInterface::class);
+    $doctrine->clear();
+  }
+
+  protected function request(string $method, string $url, array $body) {
+    self::$client->request($method, $url, [], [], [], json_encode($body));
+    $this->afterRequest();
   }
 }

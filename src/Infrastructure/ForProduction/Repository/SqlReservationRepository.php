@@ -3,6 +3,7 @@
 namespace App\Infrastructure\ForProduction\Repository;
 
 use App\Application\Ports\Repositories\IReservationRepository;
+use App\Domain\Entity\House;
 use App\Domain\Entity\Reservation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -18,6 +19,10 @@ class SqlReservationRepository extends ServiceEntityRepository implements IReser
 
   public function save(Reservation $reservation): void {
     $em = $this->getEntityManager();
+
+    $house = $em->getReference(House::class, $reservation->getHouseId());
+    $reservation->setHouse($house);
+
     $em->persist($reservation);
   }
 }
