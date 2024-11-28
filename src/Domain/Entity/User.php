@@ -12,6 +12,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
 
   private string $password;
 
+  static function create(string $id, string $emailAddress, string $password): User {
+    $user = new User();
+    $user->id = $id;
+    $user->emailAddress = $emailAddress;
+    $user->password = $password;
+
+    return $user;
+  }
+
   public function getId(): string {
     return $this->id;
   }

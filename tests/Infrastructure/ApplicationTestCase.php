@@ -41,4 +41,13 @@ class ApplicationTestCase extends WebTestCase {
     ], json_encode($body));
     $this->afterRequest();
   }
+
+  protected function load(array $fixtures) {
+    foreach ($fixtures as $fixture) {
+      $fixture->load(self::getContainer());
+    }
+
+    $doctrine = self::getContainer()->get(EntityManagerInterface::class);
+    $doctrine->flush();
+  }
 }
