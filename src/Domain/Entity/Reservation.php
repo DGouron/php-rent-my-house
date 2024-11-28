@@ -17,6 +17,8 @@ class Reservation {
 
   private House $house;
 
+  private User $tenant;
+
   public function __construct(string $id, string $houseId, string $tenantId, DateTime $startDate, DateTime $endDate) {
     $this->id = $id;
     $this->houseId = $houseId;
@@ -55,5 +57,17 @@ class Reservation {
 
   public function getHouse(): House {
     return $this->house;
+  }
+
+  public function setTenantId(string $tenantId): void {
+    $this->tenantId = $tenantId;
+  }
+
+  public function setTenant(User $tenant): void {
+    $this->tenant = $tenant;
+  }
+
+  public function getTenant(): User {
+    return $this->tenant;
   }
 }

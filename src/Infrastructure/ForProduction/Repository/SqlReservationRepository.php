@@ -5,6 +5,7 @@ namespace App\Infrastructure\ForProduction\Repository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Domain\Entity\House;
 use App\Domain\Entity\Reservation;
+use App\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,6 +24,9 @@ class SqlReservationRepository extends ServiceEntityRepository implements IReser
     $house = $em->getReference(House::class, $reservation->getHouseId());
     $reservation->setHouse($house);
 
+    $tenant = $em->getReference(User::class, $reservation->getTenantId());
+    $reservation->setTenant($tenant);
+
     $em->persist($reservation);
   }
 
@@ -32,6 +36,7 @@ class SqlReservationRepository extends ServiceEntityRepository implements IReser
     }
 
     $reservation->setHouseId($reservation->getHouse()->getId());
+    $reservation->setTenantId($reservation->getTenant()->getId());
 
     return $reservation;
   }

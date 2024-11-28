@@ -24,3 +24,4 @@ services:
     App\Application\Ports\Services\IUserProvider: '@App\Infrastructure\ForProduction\Services\WebAuthenticatedUserProvider'
     App\Application\Ports\Repositories\IHouseRepository: '@App\Infrastructure\ForProduction\Repository\SqlHouseRepository'
     App\Application\Ports\Repositories\IReservationRepository: '@App\Infrastructure\ForProduction\Repository\SqlReservationRepository'
+    App\Application\Ports\Repositories\IUserRepository: '@App\Infrastructure\ForProduction\Repository\SqlUserRepository'
