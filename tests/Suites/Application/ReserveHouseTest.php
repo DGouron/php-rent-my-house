@@ -91,4 +91,34 @@ class ReserveHouseTest extends ApplicationTestCase {
 
     $this->assertEquals("House not found", $data['message']);
   }
+
+  public function test_invalidInput() {
+    $client = self::initialize();
+
+    $user = new User();
+    $user->setId("user-id");
+    $user->setEmailAddress("johndoe@gmail.com");
+    $user->setPassword("azerty");
+
+    $passwordHasher = self::getContainer()->get(UserPasswordHasherInterface::class);
+    $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
+
+    /** @var IUserRepository $userRepository */
+    $userRepository = self::getContainer()->get(IUserRepository::class);
+    $userRepository->save($user);
+
+    $client->loginUser($user);
+
+    /** @var IHouseRepository $houseRepository */
+    $houseRepository = self::getContainer()->get(IHouseRepository::class);
+    $houseRepository->save(new House("house-id"));
+
+    $this->request('POST', '/api/reserve-house', [
+      'houseId' => '',
+      'startDate' => '',
+      'endDate' => '',
+    ]);
+
+    $this->assertResponseStatusCodeSame(400);
+  }
 }

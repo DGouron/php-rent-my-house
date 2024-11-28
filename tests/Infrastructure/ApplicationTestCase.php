@@ -36,7 +36,9 @@ class ApplicationTestCase extends WebTestCase {
   }
 
   protected function request(string $method, string $url, array $body) {
-    self::$client->request($method, $url, [], [], [], json_encode($body));
+    self::$client->request($method, $url, [], [], [
+      'CONTENT_TYPE' => 'application/json',
+    ], json_encode($body));
     $this->afterRequest();
   }
 }
