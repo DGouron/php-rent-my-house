@@ -2,22 +2,13 @@
 namespace App\Application\Controller;
 
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
-use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Lib\AppController;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ReservationController extends AbstractController {
+class ReservationController extends AppController {
   #[Route('/api/reserve-house', format: "json")]
-  public function reserveHouse(
-    ReserveHouseCommandHandler $commandHandler,
-    EntityManagerInterface $entityManager,
-    #[MapRequestPayload] ReserveHouseCommand $command
-  ) {
-    $response = $commandHandler->execute($command);
-    $entityManager->flush();
-
-    return $this->json($response);
+  public function reserveHouse(#[MapRequestPayload] ReserveHouseCommand $command) {
+    return $this->dispatch($command);
   }
 }

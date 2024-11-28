@@ -6,11 +6,16 @@ use App\Application\Exception\NotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 class ExceptionListener {
   public function __invoke(ExceptionEvent $event) {
     $exception = $event->getThrowable();
+    if ($exception instanceof HandlerFailedException) {
+      $exception = $exception->getPrevious();
+    }
+
     $response = new Response();
 
     $output = [

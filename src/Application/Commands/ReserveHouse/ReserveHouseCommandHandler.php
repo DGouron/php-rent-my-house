@@ -10,8 +10,9 @@ use App\Application\Ports\Services\IUserProvider;
 use App\Domain\Entity\Reservation;
 use App\Domain\ViewModel\IdViewModel;
 use DateTime;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler]
 class ReserveHouseCommandHandler {
   private IIdProvider $idProvider;
   private IReservationRepository $repository;
@@ -42,5 +43,9 @@ class ReserveHouseCommandHandler {
     $this->repository->save($reservation);
 
     return new IdViewModel($reservation->getId());
+  }
+
+  public function __invoke(ReserveHouseCommand $command) {
+    return $this->execute($command);
   }
 }
