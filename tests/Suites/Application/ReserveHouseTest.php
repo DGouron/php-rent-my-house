@@ -6,7 +6,6 @@ use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Domain\Entity\House;
 use App\Tests\Infrastructure\ApplicationTestCase;
-use Doctrine\ORM\EntityManagerInterface;
 
 class ReserveHouseTest extends ApplicationTestCase {
   public function test_happyPath() {
@@ -34,5 +33,9 @@ class ReserveHouseTest extends ApplicationTestCase {
     $reservation = $reservationRepository->findById($id);
 
     $this->assertNotNull($reservation);
+
+    $this->assertEquals("house-id", $reservation->getHouseId());
+    $this->assertEquals("2022-01-01", $reservation->getStartDate()->format('Y-m-d'));
+    $this->assertEquals("2022-01-02", $reservation->getEndDate()->format('Y-m-d'));
   }
 }

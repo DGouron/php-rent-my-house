@@ -14,7 +14,7 @@ class SqlReservationRepository extends ServiceEntityRepository implements IReser
   }
 
   public function findById(string $id): ?Reservation {
-    return $this->find($id);
+    return $this->hydrate($this->find($id));
   }
 
   public function save(Reservation $reservation): void {
@@ -24,5 +24,15 @@ class SqlReservationRepository extends ServiceEntityRepository implements IReser
     $reservation->setHouse($house);
 
     $em->persist($reservation);
+  }
+
+  private function hydrate(?Reservation $reservation): ?Reservation {
+    if ($reservation === null) {
+      return null;
+    }
+
+    $reservation->setHouseId($reservation->getHouse()->getId());
+
+    return $reservation;
   }
 }

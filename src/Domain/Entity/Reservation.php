@@ -48,4 +48,12 @@ class Reservation {
   public function setHouse(House $house): void {
     $this->house = $house;
   }
+
+  public function setHouseId(string $houseId): void {
+    $this->houseId = $houseId;
+  }
+
+  public function getHouse(): House {
+    return $this->house;
+  }
 }
