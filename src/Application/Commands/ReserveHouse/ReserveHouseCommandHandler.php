@@ -7,8 +7,8 @@ use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Services\IIdProvider;
 use App\Application\Ports\Services\IUserProvider;
+use App\Application\ViewModel\IdViewModel;
 use App\Domain\Entity\Reservation;
-use App\Domain\ViewModel\IdViewModel;
 use DateTime;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
