@@ -15,7 +15,7 @@ class RamHouseRepository implements IHouseRepository {
   public function findById(string $id): ?House {
     foreach ($this->database as $house) {
       if ($house->getId() === $id) {
-        return $house;
+        return $this->copy($house);
       }
     }
 
@@ -23,6 +23,17 @@ class RamHouseRepository implements IHouseRepository {
   }
 
   public function save(House $house): void {
+    foreach ($this->database as $key => $value) {
+      if ($value->getId() === $house->getId()) {
+        $this->database[$key] = $house;
+        return;
+      }
+    }
+
     $this->database[] = $house;
+  }
+
+  private function copy(House $house) {
+    return new House($house->getId(), $house->getEntries()->toArray());
   }
 }

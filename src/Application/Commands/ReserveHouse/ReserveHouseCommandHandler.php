@@ -42,6 +42,9 @@ class ReserveHouseCommandHandler {
 
     $this->repository->save($reservation);
 
+    $house->addReservation($reservation);
+    $this->houseRepository->save($house);
+
     return new IdViewModel($reservation->getId());
   }
 

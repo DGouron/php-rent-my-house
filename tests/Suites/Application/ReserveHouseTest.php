@@ -2,7 +2,9 @@
 
 namespace App\Tests\Suites\Application;
 
+use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
+use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
 use App\Domain\Entity\User;
 use App\Tests\Fixtures\HouseFixture;
@@ -53,6 +55,17 @@ class ReserveHouseTest extends ApplicationTestCase {
     $this->assertEquals("user-id", $reservation->getTenantId());
     $this->assertEquals("2022-01-01", $reservation->getStartDate()->format('Y-m-d'));
     $this->assertEquals("2022-01-02", $reservation->getEndDate()->format('Y-m-d'));
+
+    /** @var IHouseRepository $houseRepository */
+    $houseRepository = self::getContainer()->get(IHouseRepository::class);
+    $house = $houseRepository->findById('house-id');
+
+    $entry = $house->findEntryById($id);
+
+    $this->assertNotNull($entry);
+    $this->assertEquals("2022-01-01", $entry->getStartDate()->format('Y-m-d'));
+    $this->assertEquals("2022-01-02", $entry->getEndDate()->format('Y-m-d'));
+    $this->assertEquals(EntryStatus::PENDING, $entry->getStatus());
   }
 
   public function test_houseNotFound() {
