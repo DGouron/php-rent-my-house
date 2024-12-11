@@ -8,8 +8,8 @@
         <field name="startDate" type="datetime" column="start_date"/>
         <field name="endDate" type="datetime" column="end_date"/>
         <field name="status" type="string" column="status" enum-type="App\Domain\Entity\EntryStatus"/>
-        <many-to-one field="house" target-entity="App\Domain\Entity\House" inversed-by="entries">
-            <join-column name="house_id" referenced-column-name="id"/>
+        <many-to-one field="houseCalendar" target-entity="App\Domain\Entity\HouseCalendar" inversed-by="entries">
+            <join-column name="house_calendar_id" referenced-column-name="id"/>
         </many-to-one>
     </entity>
 </doctrine-mapping>

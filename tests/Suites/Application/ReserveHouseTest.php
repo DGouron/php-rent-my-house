@@ -2,11 +2,13 @@
 
 namespace App\Tests\Suites\Application;
 
-use App\Application\Ports\Repositories\IHouseRepository;
+use App\Application\Ports\Repositories\IHouseCalendarRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
+use App\Domain\Entity\HouseCalendar;
 use App\Domain\Entity\User;
+use App\Tests\Fixtures\HouseCalendarFixture;
 use App\Tests\Fixtures\HouseFixture;
 use App\Tests\Fixtures\UserFixture;
 use App\Tests\Infrastructure\ApplicationTestCase;
@@ -27,21 +29,24 @@ class ReserveHouseTest extends ApplicationTestCase {
 
     $house = new HouseFixture(new House("house-id", "owner-id"));
 
+    $houseCalendar = new HouseCalendarFixture(new HouseCalendar("house-id", []));
+
     $this->load([
       $user,
       $owner,
-      $house
+      $house,
+      $houseCalendar,
     ]);
 
     $user->authenticate($client);
   }
 
   public function test_happyPath() {
-   $this->request('POST', '/api/reserve-house', [
-     'houseId' => 'house-id',
-     'startDate' => '2022-01-01',
-     'endDate' => '2022-01-02',
-   ]);
+    $this->request('POST', '/api/reserve-house', [
+      'houseId' => 'house-id',
+      'startDate' => '2022-01-01',
+      'endDate' => '2022-01-02',
+    ]);
 
     $this->assertResponseStatusCodeSame(200);
 
@@ -61,11 +66,11 @@ class ReserveHouseTest extends ApplicationTestCase {
     $this->assertEquals("2022-01-01", $reservation->getStartDate()->format('Y-m-d'));
     $this->assertEquals("2022-01-02", $reservation->getEndDate()->format('Y-m-d'));
 
-    /** @var IHouseRepository $houseRepository */
-    $houseRepository = self::getContainer()->get(IHouseRepository::class);
-    $house = $houseRepository->findById('house-id');
+    /** @var IHouseCalendarRepository $houseCalendarRepository */
+    $houseCalendarRepository = self::getContainer()->get(IHouseCalendarRepository::class);
+    $calendar = $houseCalendarRepository->findById('house-id');
 
-    $entry = $house->findEntryById($id);
+    $entry = $calendar->findEntryById($id);
 
     $this->assertNotNull($entry);
     $this->assertEquals("2022-01-01", $entry->getStartDate()->format('Y-m-d'));

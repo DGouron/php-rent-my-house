@@ -2,13 +2,15 @@
 
 namespace App\Tests\Suites\Application;
 
-use App\Application\Ports\Repositories\IHouseRepository;
+use App\Application\Ports\Repositories\IHouseCalendarRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
+use App\Domain\Entity\HouseCalendar;
 use App\Domain\Entity\Reservation;
 use App\Domain\Entity\ReservationStatus;
 use App\Domain\Entity\User;
+use App\Tests\Fixtures\HouseCalendarFixture;
 use App\Tests\Fixtures\HouseFixture;
 use App\Tests\Fixtures\ReservationFixture;
 use App\Tests\Fixtures\UserFixture;
@@ -45,12 +47,14 @@ class AcceptReservationTest extends ApplicationTestCase {
       )
     );
 
-    $house->getHouse()->addReservation($reservation->getReservation());
+    $houseCalendar = new HouseCalendarFixture(new HouseCalendar("house-id", []));
+    $houseCalendar->getHouseCalendar()->addReservation($reservation->getReservation());
 
     $this->load([
       $this->tenant,
       $this->owner,
       $house,
+      $houseCalendar,
       $reservation,
     ]);
   }
@@ -59,8 +63,8 @@ class AcceptReservationTest extends ApplicationTestCase {
     $this->owner->authenticate(self::$client);
 
     $this->request('POST', '/api/accept-reservation', [
-     'reservationId' => 'reservation-id',
-   ]);
+      'reservationId' => 'reservation-id',
+    ]);
 
     $this->assertResponseStatusCodeSame(200);
 
@@ -71,9 +75,9 @@ class AcceptReservationTest extends ApplicationTestCase {
     $this->assertNotNull($reservation);
     $this->assertEquals(ReservationStatus::ACCEPTED, $reservation->getStatus());
 
-    /** @var IHouseRepository $houseRepository */
-    $houseRepository = self::getContainer()->get(IHouseRepository::class);
-    $house = $houseRepository->findById('house-id');
+    /** @var IHouseCalendarRepository $houseCalendarRepository */
+    $houseCalendarRepository = self::getContainer()->get(IHouseCalendarRepository::class);
+    $house = $houseCalendarRepository->findById('house-id');
     $entry = $house->findEntryById("reservation-id");
 
     $this->assertNotNull($entry);
@@ -84,8 +88,8 @@ class AcceptReservationTest extends ApplicationTestCase {
     $this->tenant->authenticate(self::$client);
 
     $this->request('POST', '/api/accept-reservation', [
-     'reservationId' => 'reservation-id',
-   ]);
+      'reservationId' => 'reservation-id',
+    ]);
 
     $this->assertResponseStatusCodeSame(403);
 
@@ -96,9 +100,9 @@ class AcceptReservationTest extends ApplicationTestCase {
     $this->assertNotNull($reservation);
     $this->assertEquals(ReservationStatus::PENDING, $reservation->getStatus());
 
-    /** @var IHouseRepository $houseRepository */
-    $houseRepository = self::getContainer()->get(IHouseRepository::class);
-    $house = $houseRepository->findById('house-id');
+    /** @var IHouseCalendarRepository $houseCalendarRepository */
+    $houseCalendarRepository = self::getContainer()->get(IHouseCalendarRepository::class);
+    $house = $houseCalendarRepository->findById('house-id');
     $entry = $house->findEntryById("reservation-id");
 
     $this->assertNotNull($entry);

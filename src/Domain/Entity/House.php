@@ -2,61 +2,23 @@
 
 namespace App\Domain\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 class House {
   private string $id;
-
-  private Collection $entries;
 
   private string $ownerId;
 
   private User $owner;
 
-  public function __construct(string $id, string $ownerId, array $entries = []) {
+  public function __construct(string $id, string $ownerId) {
     $this->id = $id;
     $this->ownerId = $ownerId;
-    $this->entries = new ArrayCollection();
 
-    foreach ($entries as $entry) {
-      $this->entries->add($entry);
-    }
   }
 
   public function getId(): string {
     return $this->id;
   }
 
-  public function findEntryById(string $id): ?CalendarEntry {
-    foreach ($this->entries as $entry) {
-      if ($entry->getId() === $id) {
-        return $entry;
-      }
-    }
-
-    return null;
-  }
-
-  public function addReservation(Reservation $reservation) {
-    $this->entries->add(
-      new CalendarEntry(
-        $reservation->getId(),
-        $reservation->getStartDate(),
-        $reservation->getEndDate(),
-        EntryStatus::PENDING,
-        $this,
-      )
-    );
-  }
-
-  public function getEntries(): Collection {
-    return $this->entries;
-  }
-
-  /**
-   * @return string
-   */
   public function getOwnerId(): string {
     return $this->ownerId;
   }
@@ -71,24 +33,5 @@ class House {
 
   public function setOwner(User $owner): void {
     $this->owner = $owner;
-  }
-
-  public function deleteById(string $id) {
-    foreach ($this->entries as $key => $entry) {
-      if ($entry->getId() === $id) {
-        $this->entries->remove($key);
-        return;
-      }
-    }
-  }
-
-  public function isAvailable(\DateTime $startDate, \DateTime $endDate): bool {
-    foreach ($this->entries as $entry) {
-      if ($startDate < $entry->getEndDate() && $endDate > $entry->getStartDate()) {
-        return false;
-      }
-    }
-
-    return true;
   }
 }

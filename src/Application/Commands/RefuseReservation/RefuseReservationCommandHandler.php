@@ -2,19 +2,14 @@
 
 namespace App\Application\Commands\RefuseReservation;
 
-use App\Application\Commands\AcceptReservation\AcceptReservationCommand;
-use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
 use App\Application\Exception\ForbiddenException;
 use App\Application\Exception\NotFoundException;
+use App\Application\Ports\Repositories\IHouseCalendarRepository;
 use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Repositories\IUserRepository;
-use App\Application\Ports\Services\IIdProvider;
 use App\Application\Ports\Services\IMailer;
 use App\Application\Ports\Services\IUserProvider;
-use App\Application\ViewModel\IdViewModel;
-use App\Domain\Entity\Reservation;
-use DateTime;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Mime\Email;
 
@@ -24,19 +19,22 @@ class RefuseReservationCommandHandler {
   private IHouseRepository $houseRepository;
   private IUserProvider $userProvider;
   private IUserRepository $userRepository;
+  private IHouseCalendarRepository $houseCalendarRepository;
   private IMailer $mailer;
 
   public function __construct(
-    IReservationRepository $reservationRepository,
-    IHouseRepository       $houseRepository,
-    IUserProvider          $userProvider,
-    IUserRepository        $userRepository,
-    IMailer                $mailer
+    IReservationRepository   $reservationRepository,
+    IHouseRepository         $houseRepository,
+    IUserProvider            $userProvider,
+    IUserRepository          $userRepository,
+    IHouseCalendarRepository $houseCalendarRepository,
+    IMailer                  $mailer
   ) {
     $this->reservationRepository = $reservationRepository;
     $this->houseRepository = $houseRepository;
     $this->userProvider = $userProvider;
     $this->userRepository = $userRepository;
+    $this->houseCalendarRepository = $houseCalendarRepository;
     $this->mailer = $mailer;
   }
 
@@ -57,9 +55,9 @@ class RefuseReservationCommandHandler {
 
     $this->reservationRepository->save($reservation);
 
-    $house->deleteById($reservation->getId());
-
-    $this->houseRepository->save($house);
+    $houseCalendar = $this->houseCalendarRepository->findById($house->getId());
+    $houseCalendar->deleteById($reservation->getId());
+    $this->houseCalendarRepository->save($houseCalendar);
 
     $tenant = $this->userRepository->findById($reservation->getTenantId());
     $this->mailer->send((new Email())

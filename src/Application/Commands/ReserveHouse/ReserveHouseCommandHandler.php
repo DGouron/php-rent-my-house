@@ -4,6 +4,7 @@ namespace App\Application\Commands\ReserveHouse;
 
 use App\Application\Exception\BadRequestException;
 use App\Application\Exception\NotFoundException;
+use App\Application\Ports\Repositories\IHouseCalendarRepository;
 use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
 use App\Application\Ports\Repositories\IUserRepository;
@@ -23,21 +24,24 @@ class ReserveHouseCommandHandler {
   private IHouseRepository $houseRepository;
   private IUserProvider $userProvider;
   private IUserRepository $userRepository;
+  private IHouseCalendarRepository $houseCalendarRepository;
   private IMailer $mailer;
 
   public function __construct(
-    IIdProvider            $idProvider,
-    IReservationRepository $repository,
-    IHouseRepository       $houseRepository,
-    IUserProvider          $userProvider,
-    IUserRepository        $userRepository,
-    IMailer                $mailer
+    IIdProvider              $idProvider,
+    IReservationRepository   $repository,
+    IHouseRepository         $houseRepository,
+    IUserProvider            $userProvider,
+    IUserRepository          $userRepository,
+    IHouseCalendarRepository $houseCalendarRepository,
+    IMailer                  $mailer,
   ) {
     $this->idProvider = $idProvider;
     $this->repository = $repository;
     $this->houseRepository = $houseRepository;
     $this->userProvider = $userProvider;
     $this->userRepository = $userRepository;
+    $this->houseCalendarRepository = $houseCalendarRepository;
     $this->mailer = $mailer;
   }
 
@@ -55,14 +59,16 @@ class ReserveHouseCommandHandler {
       DateTime::createFromFormat("Y-m-d", $command->getEndDate())
     );
 
-    if (!$house->isAvailable($reservation->getStartDate(), $reservation->getEndDate())) {
+    $houseCalendar = $this->houseCalendarRepository->findById($house->getId());
+
+    if (!$houseCalendar->isAvailable($reservation->getStartDate(), $reservation->getEndDate())) {
       throw new BadRequestException("House not available");
     }
 
     $this->repository->save($reservation);
 
-    $house->addReservation($reservation);
-    $this->houseRepository->save($house);
+    $houseCalendar->addReservation($reservation);
+    $this->houseCalendarRepository->save($houseCalendar);
 
     $owner = $this->userRepository->findById($house->getOwnerId());
 

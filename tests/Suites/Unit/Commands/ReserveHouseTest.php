@@ -8,10 +8,12 @@ use App\Application\Exception\BadRequestException;
 use App\Application\Exception\NotFoundException;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
+use App\Domain\Entity\HouseCalendar;
 use App\Domain\Entity\Reservation;
 use App\Domain\Entity\ReservationStatus;
 use App\Domain\Entity\User;
 use App\Domain\Model\AuthenticatedUser;
+use App\Infrastructure\ForTests\Repositories\RamHouseCalendarRepository;
 use App\Infrastructure\ForTests\Repositories\RamHouseRepository;
 use App\Infrastructure\ForTests\Repositories\RamReservationRepository;
 use App\Infrastructure\ForTests\Repositories\RamUserRepository;
@@ -29,6 +31,7 @@ class ReserveHouseTest extends TestCase {
   private RamReservationRepository $reservationRepository;
   private RamHouseRepository $houseRepository;
   private RamUserRepository $userRepository;
+  private RamHouseCalendarRepository $houseCalendarRepository;
   private RamMailer $mailer;
 
   private ReserveHouseCommandHandler $commandHandler;
@@ -47,7 +50,8 @@ class ReserveHouseTest extends TestCase {
       ReservationStatus::ACCEPTED
     );
 
-    $house->addReservation($reservation);
+    $houseCalendar = new HouseCalendar("house-id");
+    $houseCalendar->addReservation($reservation);
 
     $this->idProvider = new FixedIdProvider("reservation-id");
     $this->userProvider = new FixedAuthenticatedUserProvider($this->user);
@@ -56,6 +60,7 @@ class ReserveHouseTest extends TestCase {
     $this->userRepository = new RamUserRepository([
       User::create("owner-id", "owner@gmail.com", "azerty")
     ]);
+    $this->houseCalendarRepository = new RamHouseCalendarRepository([$houseCalendar]);
     $this->mailer = new RamMailer();
 
     $this->commandHandler = new ReserveHouseCommandHandler(
@@ -64,6 +69,7 @@ class ReserveHouseTest extends TestCase {
       $this->houseRepository,
       $this->userProvider,
       $this->userRepository,
+      $this->houseCalendarRepository,
       $this->mailer
     );
   }
@@ -97,9 +103,9 @@ class ReserveHouseTest extends TestCase {
       )
     );
 
-    $house = $this->houseRepository->findById("house-id");
+    $houseCalendar = $this->houseCalendarRepository->findById("house-id");
 
-    $entry = $house->findEntryById($response->getId());
+    $entry = $houseCalendar->findEntryById($response->getId());
 
     $this->assertNotNull($entry);
     $this->assertEquals("2024-01-01", $entry->getStartDate()->format("Y-m-d"));
@@ -151,8 +157,8 @@ class ReserveHouseTest extends TestCase {
       $this->commandHandler->execute($command);
       $this->fail("The house must be available");
     } catch (\Exception $e) {
-      $this->assertInstanceOf(BadRequestException::class, $e);
       $this->assertEquals("House not available", $e->getMessage());
+      $this->assertInstanceOf(BadRequestException::class, $e);
     }
   }
 }

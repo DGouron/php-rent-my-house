@@ -18,14 +18,14 @@ class CalendarEntry {
 
   private EntryStatus $status;
 
-  private House $house;
+  private HouseCalendar $houseCalendar;
 
-  public function __construct(string $id, DateTime $startDate, DateTime $endDate, EntryStatus $status, House $house) {
+  public function __construct(string $id, DateTime $startDate, DateTime $endDate, EntryStatus $status, HouseCalendar $houseCalendar) {
     $this->id = $id;
     $this->startDate = $startDate;
     $this->endDate = $endDate;
     $this->status = $status;
-    $this->house = $house;
+    $this->houseCalendar = $houseCalendar;
   }
 
   public function getId(): string {
