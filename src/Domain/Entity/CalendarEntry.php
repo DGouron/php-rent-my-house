@@ -6,7 +6,7 @@ use DateTime;
 
 enum EntryStatus: string {
   case PENDING = 'pending';
-  case CONFIRMED = 'confirmed';
+  case ACCEPTED = 'accepted';
 }
 
 class CalendarEntry {
@@ -42,5 +42,9 @@ class CalendarEntry {
 
   public function getStatus(): EntryStatus {
     return $this->status;
+  }
+
+  public function accept() {
+    $this->status = EntryStatus::ACCEPTED;
   }
 }

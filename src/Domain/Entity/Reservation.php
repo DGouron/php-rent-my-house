@@ -4,6 +4,12 @@ namespace App\Domain\Entity;
 
 use DateTime;
 
+enum ReservationStatus: string {
+  case PENDING = 'pending';
+  case ACCEPTED = 'accepted';
+  case REFUSED = 'refused';
+}
+
 class Reservation {
   private string $id;
 
@@ -19,12 +25,22 @@ class Reservation {
 
   private User $tenant;
 
-  public function __construct(string $id, string $houseId, string $tenantId, DateTime $startDate, DateTime $endDate) {
+  private ReservationStatus $status;
+
+  public function __construct(
+    string $id,
+    string $houseId,
+    string $tenantId,
+    DateTime $startDate,
+    DateTime $endDate,
+    ReservationStatus $status = ReservationStatus::PENDING
+  ) {
     $this->id = $id;
     $this->houseId = $houseId;
     $this->tenantId = $tenantId;
     $this->startDate = $startDate;
     $this->endDate = $endDate;
+    $this->status = $status;
   }
 
   public function getId(): string {
@@ -69,5 +85,13 @@ class Reservation {
 
   public function getTenant(): User {
     return $this->tenant;
+  }
+
+  public function getStatus(): ReservationStatus {
+    return $this->status;
+  }
+
+  public function accept() {
+    $this->status = ReservationStatus::ACCEPTED;
   }
 }

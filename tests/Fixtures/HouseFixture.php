@@ -11,6 +11,13 @@ class HouseFixture implements IFixture {
   public function __construct(private readonly House $house) {
   }
 
+  /**
+   * @return House
+   */
+  public function getHouse(): House {
+    return $this->house;
+  }
+
   public function load(Container $container): void {
     //** @var IHouseRepository $houseRepository */
     $houseRepository = $container->get(IHouseRepository::class);

@@ -7,6 +7,7 @@ use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
 use App\Application\Exception\NotFoundException;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
+use App\Domain\Entity\ReservationStatus;
 use App\Domain\Entity\User;
 use App\Domain\Model\AuthenticatedUser;
 use App\Infrastructure\ForTests\Repositories\RamHouseRepository;
@@ -70,6 +71,7 @@ class ReserveHouseTest extends TestCase {
     $this->assertEquals("2024-01-02", $reservation->getEndDate()->format("Y-m-d"));
     $this->assertEquals("house-id", $reservation->getHouseId());
     $this->assertEquals("user-id", $reservation->getTenantId());
+    $this->assertEquals(ReservationStatus::PENDING, $reservation->getStatus());
   }
 
   public function test_happyPath_shouldReserveCalendarEntry() {
