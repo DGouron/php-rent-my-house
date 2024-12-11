@@ -2,6 +2,7 @@
 
 namespace App\Application\Listeners;
 
+use App\Application\Exception\BadRequestException;
 use App\Application\Exception\ForbiddenException;
 use App\Application\Exception\NotFoundException;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +37,10 @@ class ExceptionListener {
       $response->setStatusCode(Response::HTTP_NOT_FOUND);
     } else if ($exception instanceof ForbiddenException) {
       $response->setStatusCode(Response::HTTP_FORBIDDEN);
+    } else if ($exception instanceof BadRequestException) {
+      $response->setStatusCode(Response::HTTP_BAD_REQUEST);
+    } else {
+      $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     $response->setContent(json_encode($output));

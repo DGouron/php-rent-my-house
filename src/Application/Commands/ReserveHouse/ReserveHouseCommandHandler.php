@@ -2,6 +2,7 @@
 
 namespace App\Application\Commands\ReserveHouse;
 
+use App\Application\Exception\BadRequestException;
 use App\Application\Exception\NotFoundException;
 use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
@@ -25,12 +26,12 @@ class ReserveHouseCommandHandler {
   private IMailer $mailer;
 
   public function __construct(
-    IIdProvider $idProvider,
+    IIdProvider            $idProvider,
     IReservationRepository $repository,
-    IHouseRepository $houseRepository,
-    IUserProvider $userProvider,
-    IUserRepository $userRepository,
-    IMailer $mailer
+    IHouseRepository       $houseRepository,
+    IUserProvider          $userProvider,
+    IUserRepository        $userRepository,
+    IMailer                $mailer
   ) {
     $this->idProvider = $idProvider;
     $this->repository = $repository;
@@ -53,6 +54,10 @@ class ReserveHouseCommandHandler {
       DateTime::createFromFormat("Y-m-d", $command->getStartDate()),
       DateTime::createFromFormat("Y-m-d", $command->getEndDate())
     );
+
+    if (!$house->isAvailable($reservation->getStartDate(), $reservation->getEndDate())) {
+      throw new BadRequestException("House not available");
+    }
 
     $this->repository->save($reservation);
 

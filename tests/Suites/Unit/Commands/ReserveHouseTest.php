@@ -4,9 +4,11 @@ namespace App\Tests\Suites\Unit\Commands;
 
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
+use App\Application\Exception\BadRequestException;
 use App\Application\Exception\NotFoundException;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
+use App\Domain\Entity\Reservation;
 use App\Domain\Entity\ReservationStatus;
 use App\Domain\Entity\User;
 use App\Domain\Model\AuthenticatedUser;
@@ -16,6 +18,7 @@ use App\Infrastructure\ForTests\Repositories\RamUserRepository;
 use App\Infrastructure\ForTests\Services\FixedAuthenticatedUserProvider;
 use App\Infrastructure\ForTests\Services\FixedIdProvider;
 use App\Infrastructure\ForTests\Services\RamMailer;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 
 class ReserveHouseTest extends TestCase {
@@ -33,12 +36,23 @@ class ReserveHouseTest extends TestCase {
   protected function setUp(): void {
     $this->user = new AuthenticatedUser("user-id");
 
+    $house = new House("house-id", "owner-id");
+
+    $reservation = new Reservation(
+      "rersevation-1",
+      "house-id",
+      "user-id",
+      new DateTime("2024-01-05"),
+      new DateTime("2024-01-06"),
+      ReservationStatus::ACCEPTED
+    );
+
+    $house->addReservation($reservation);
+
     $this->idProvider = new FixedIdProvider("reservation-id");
     $this->userProvider = new FixedAuthenticatedUserProvider($this->user);
-    $this->reservationRepository = new RamReservationRepository();
-    $this->houseRepository = new RamHouseRepository([
-      new House("house-id", "owner-id")
-    ]);
+    $this->reservationRepository = new RamReservationRepository([$reservation]);
+    $this->houseRepository = new RamHouseRepository([$house]);
     $this->userRepository = new RamUserRepository([
       User::create("owner-id", "owner@gmail.com", "azerty")
     ]);
@@ -119,10 +133,26 @@ class ReserveHouseTest extends TestCase {
 
     try {
       $this->commandHandler->execute($command);
-      $this->fail("The house should exist");
+      $this->fail("The house must exist");
     } catch (\Exception $e) {
       $this->assertInstanceOf(NotFoundException::class, $e);
       $this->assertEquals("House not found", $e->getMessage());
+    }
+  }
+
+  public function test_whenHouseIsUnavailable_shouldFail() {
+    $command = new ReserveHouseCommand(
+      "house-id",
+      "2024-01-05",
+      "2024-01-06"
+    );
+
+    try {
+      $this->commandHandler->execute($command);
+      $this->fail("The house must be available");
+    } catch (\Exception $e) {
+      $this->assertInstanceOf(BadRequestException::class, $e);
+      $this->assertEquals("House not available", $e->getMessage());
     }
   }
 }

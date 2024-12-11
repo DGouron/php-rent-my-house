@@ -81,4 +81,14 @@ class House {
       }
     }
   }
+
+  public function isAvailable(\DateTime $startDate, \DateTime $endDate): bool {
+    foreach ($this->entries as $entry) {
+      if ($startDate < $entry->getEndDate() && $endDate > $entry->getStartDate()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
