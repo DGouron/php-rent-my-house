@@ -74,10 +74,34 @@ class AcceptReservationTest extends ApplicationTestCase {
     /** @var IHouseRepository $houseRepository */
     $houseRepository = self::getContainer()->get(IHouseRepository::class);
     $house = $houseRepository->findById('house-id');
-
     $entry = $house->findEntryById("reservation-id");
 
     $this->assertNotNull($entry);
     $this->assertEquals(EntryStatus::ACCEPTED, $entry->getStatus());
+  }
+
+  public function test_requesterIsNotOwner_shouldFail() {
+    $this->tenant->authenticate(self::$client);
+
+    $this->request('POST', '/api/accept-reservation', [
+     'reservationId' => 'reservation-id',
+   ]);
+
+    $this->assertResponseStatusCodeSame(403);
+
+    /** @var IReservationRepository $reservationRepository */
+    $reservationRepository = self::getContainer()->get(IReservationRepository::class);
+    $reservation = $reservationRepository->findById("reservation-id");
+
+    $this->assertNotNull($reservation);
+    $this->assertEquals(ReservationStatus::PENDING, $reservation->getStatus());
+
+    /** @var IHouseRepository $houseRepository */
+    $houseRepository = self::getContainer()->get(IHouseRepository::class);
+    $house = $houseRepository->findById('house-id');
+    $entry = $house->findEntryById("reservation-id");
+
+    $this->assertNotNull($entry);
+    $this->assertEquals(EntryStatus::PENDING, $entry->getStatus());
   }
 }

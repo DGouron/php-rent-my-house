@@ -5,6 +5,8 @@ namespace App\Tests\Suites\Unit\Commands;
 use App\Application\Commands\AcceptReservation\AcceptReservationCommand;
 use App\Application\Commands\AcceptReservation\AcceptReservationCommandHandler;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
+use App\Application\Exception\ForbiddenException;
+use App\Application\Exception\NotFoundException;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
 use App\Domain\Entity\Reservation;
@@ -81,5 +83,41 @@ class AcceptReservationTest extends TestCase {
     $entry = $house->findEntryById("reservation-id");
 
     $this->assertEquals(EntryStatus::ACCEPTED, $entry->getStatus());
+  }
+
+  public function test_happyPath_shouldSendAnEmailToTheTenant() {
+    $command = new AcceptReservationCommand("reservation-id");
+    ($this->commandHandler)($command);
+
+    $message = $this->mailer->inbox[0];
+
+    $this->assertEquals("Réservation acceptée", $message->getSubject());
+    $this->assertEquals("tenant@gmail.com", $message->getTo()[0]->getAddress());
+  }
+
+  public function test_happyPath_shouldSendAnEmailToTheOwner() {
+    $command = new AcceptReservationCommand("reservation-id");
+    ($this->commandHandler)($command);
+
+    $message = $this->mailer->inbox[1];
+
+    $this->assertEquals("Confirmation d'acceptation", $message->getSubject());
+    $this->assertEquals("owner@gmail.com", $message->getTo()[0]->getAddress());
+  }
+
+  public function test_requesterIsNotOwner_shouldFail() {
+    $this->expectException(ForbiddenException::class);
+
+    $this->userProvider->setUser($this->tenant);
+
+    $command = new AcceptReservationCommand("reservation-id");
+    ($this->commandHandler)($command);
+  }
+
+  public function test_reservationNotFound_shouldFail() {
+    $this->expectException(NotFoundException::class);
+
+    $command = new AcceptReservationCommand("this-id-does-not-exist");
+    ($this->commandHandler)($command);
   }
 }

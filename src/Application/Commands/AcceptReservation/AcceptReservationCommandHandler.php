@@ -3,6 +3,7 @@
 namespace App\Application\Commands\AcceptReservation;
 
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
+use App\Application\Exception\ForbiddenException;
 use App\Application\Exception\NotFoundException;
 use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IReservationRepository;
@@ -40,15 +41,39 @@ class AcceptReservationCommandHandler {
 
   public function __invoke(AcceptReservationCommand $command) {
     $reservation = $this->reservationRepository->findById($command->getReservationId());
+
+    if ($reservation === null) {
+      throw new NotFoundException("Reservation not found");
+    }
+
+    $house = $this->houseRepository->findById($reservation->getHouseId());
+
+    if ($house->getOwnerId() !== $this->userProvider->getUser()->getId()) {
+      throw new ForbiddenException("Only the owner can accept a reservation");
+    }
+
     $reservation->accept();
 
     $this->reservationRepository->save($reservation);
 
-    $house = $this->houseRepository->findById($reservation->getHouseId());
     $entry = $house->findEntryById($reservation->getId());
-
     $entry->accept();
 
     $this->houseRepository->save($house);
+
+    $tenant = $this->userRepository->findById($reservation->getTenantId());
+
+    $this->mailer->send((new Email())
+      ->subject("Réservation acceptée")
+      ->to($tenant->getEmailAddress())
+      ->html("<p>Votre réservation a été acceptée</p>"));
+
+    $owner = $this->userRepository->findById($house->getOwnerId());
+
+    $this->mailer->send((new Email())
+      ->subject("Confirmation d'acceptation")
+      ->to($owner->getEmailAddress())
+      ->html("<p>Votre acceptation a bien été pris en compte</p>")
+    );
   }
 }

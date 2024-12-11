@@ -15,4 +15,8 @@ class FixedAuthenticatedUserProvider implements IUserProvider {
   public function getUser(): AuthenticatedUser {
     return $this->user;
   }
+
+  public function setUser(AuthenticatedUser $user): void {
+    $this->user = $user;
+  }
 }
