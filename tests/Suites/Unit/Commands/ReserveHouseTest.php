@@ -7,11 +7,14 @@ use App\Application\Commands\ReserveHouse\ReserveHouseCommandHandler;
 use App\Application\Exception\NotFoundException;
 use App\Domain\Entity\EntryStatus;
 use App\Domain\Entity\House;
+use App\Domain\Entity\User;
 use App\Domain\Model\AuthenticatedUser;
 use App\Infrastructure\ForTests\Repositories\RamHouseRepository;
 use App\Infrastructure\ForTests\Repositories\RamReservationRepository;
+use App\Infrastructure\ForTests\Repositories\RamUserRepository;
 use App\Infrastructure\ForTests\Services\FixedAuthenticatedUserProvider;
 use App\Infrastructure\ForTests\Services\FixedIdProvider;
+use App\Infrastructure\ForTests\Services\RamMailer;
 use PHPUnit\Framework\TestCase;
 
 class ReserveHouseTest extends TestCase {
@@ -21,6 +24,8 @@ class ReserveHouseTest extends TestCase {
   private FixedAuthenticatedUserProvider $userProvider;
   private RamReservationRepository $reservationRepository;
   private RamHouseRepository $houseRepository;
+  private RamUserRepository $userRepository;
+  private RamMailer $mailer;
 
   private ReserveHouseCommandHandler $commandHandler;
 
@@ -31,14 +36,20 @@ class ReserveHouseTest extends TestCase {
     $this->userProvider = new FixedAuthenticatedUserProvider($this->user);
     $this->reservationRepository = new RamReservationRepository();
     $this->houseRepository = new RamHouseRepository([
-      new House("house-id")
+      new House("house-id", "owner-id")
     ]);
+    $this->userRepository = new RamUserRepository([
+      User::create("owner-id", "owner@gmail.com", "azerty")
+    ]);
+    $this->mailer = new RamMailer();
 
     $this->commandHandler = new ReserveHouseCommandHandler(
       $this->idProvider,
       $this->reservationRepository,
       $this->houseRepository,
-      $this->userProvider
+      $this->userProvider,
+      $this->userRepository,
+      $this->mailer
     );
   }
 
@@ -80,6 +91,22 @@ class ReserveHouseTest extends TestCase {
     $this->assertEquals(EntryStatus::PENDING, $entry->getStatus());
   }
 
+  public function test_happyPath_shouldSendEmailToOwner() {
+    $response = $this->commandHandler->execute(
+      new ReserveHouseCommand(
+        "house-id",
+        "2024-01-01",
+        "2024-01-02"
+      )
+    );
+
+    $this->assertCount(1, $this->mailer->inbox);
+
+    $email = $this->mailer->inbox[0];
+
+    $this->assertEquals("Nouvelle réservation", $email->getSubject());
+    $this->assertEquals("owner@gmail.com", $email->getTo()[0]->getAddress());
+  }
 
   public function test_whenHouseNotDefined_shouldFail() {
     $command = new ReserveHouseCommand(

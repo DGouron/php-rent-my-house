@@ -21,10 +21,15 @@ class ReserveHouseTest extends ApplicationTestCase {
       User::create("user-id", "johndoe@gmail.com", "azerty")
     );
 
-    $house = new HouseFixture(new House("house-id"));
+    $owner = new UserFixture(
+      User::create("owner-id", "owner@gmail.com", "azerty")
+    );
+
+    $house = new HouseFixture(new House("house-id", "owner-id"));
 
     $this->load([
       $user,
+      $owner,
       $house
     ]);
 
@@ -66,6 +71,13 @@ class ReserveHouseTest extends ApplicationTestCase {
     $this->assertEquals("2022-01-01", $entry->getStartDate()->format('Y-m-d'));
     $this->assertEquals("2022-01-02", $entry->getEndDate()->format('Y-m-d'));
     $this->assertEquals(EntryStatus::PENDING, $entry->getStatus());
+
+    $this->assertQueuedEmailCount(1);
+
+    $email = $this->getMailerMessage(0);
+
+    $this->assertEquals("Nouvelle réservation", $email->getSubject());
+    $this->assertEquals("owner@gmail.com", $email->getTo()[0]->getAddress());
   }
 
   public function test_houseNotFound() {

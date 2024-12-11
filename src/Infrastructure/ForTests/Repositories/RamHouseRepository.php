@@ -34,6 +34,6 @@ class RamHouseRepository implements IHouseRepository {
   }
 
   private function copy(House $house) {
-    return new House($house->getId(), $house->getEntries()->toArray());
+    return new House($house->getId(), $house->getOwnerId(), $house->getEntries()->toArray());
   }
 }

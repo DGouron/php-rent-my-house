@@ -12,6 +12,10 @@ class SqlUserRepository extends ServiceEntityRepository implements IUserReposito
     parent::__construct($registry, User::class);
   }
 
+  public function findById(string $id): ?User {
+    return $this->find($id);
+  }
+
   public function save(User $user) {
     $this->getEntityManager()->persist($user);
   }
