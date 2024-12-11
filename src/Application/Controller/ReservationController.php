@@ -2,6 +2,7 @@
 namespace App\Application\Controller;
 
 use App\Application\Commands\AcceptReservation\AcceptReservationCommand;
+use App\Application\Commands\RefuseReservation\RefuseReservationCommand;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
 use App\Lib\AppController;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -15,6 +16,11 @@ class ReservationController extends AppController {
 
   #[Route('/api/accept-reservation', format: "json")]
   public function acceptReservation(#[MapRequestPayload] AcceptReservationCommand $command) {
+    return $this->dispatch($command);
+  }
+
+  #[Route('/api/refuse-reservation', format: "json")]
+  public function refuseReservation(#[MapRequestPayload] RefuseReservationCommand $command) {
     return $this->dispatch($command);
   }
 }

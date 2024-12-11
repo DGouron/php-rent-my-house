@@ -72,4 +72,13 @@ class House {
   public function setOwner(User $owner): void {
     $this->owner = $owner;
   }
+
+  public function deleteById(string $id) {
+    foreach ($this->entries as $key => $entry) {
+      if ($entry->getId() === $id) {
+        $this->entries->remove($key);
+        return;
+      }
+    }
+  }
 }

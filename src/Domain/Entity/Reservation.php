@@ -94,4 +94,8 @@ class Reservation {
   public function accept() {
     $this->status = ReservationStatus::ACCEPTED;
   }
+
+  public function refuse() {
+    $this->status = ReservationStatus::REFUSED;
+  }
 }

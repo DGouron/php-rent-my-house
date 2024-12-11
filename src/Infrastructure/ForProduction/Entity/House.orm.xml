@@ -5,7 +5,12 @@
                           https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="App\Domain\Entity\House" table="houses">
         <id name="id" type="string" column="id"/>
-        <one-to-many field="entries" target-entity="App\Domain\Entity\CalendarEntry" mapped-by="house" fetch="EAGER">
+        <one-to-many
+                field="entries"
+                target-entity="App\Domain\Entity\CalendarEntry"
+                mapped-by="house"
+                fetch="EAGER"
+                orphan-removal="true">
             <cascade>
                 <cascade-all/>
             </cascade>
