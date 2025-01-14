@@ -2,9 +2,7 @@
 
 namespace App\Infrastructure\ForTests\Repositories;
 
-use App\Application\Ports\Repositories\IHouseRepository;
 use App\Application\Ports\Repositories\IUserRepository;
-use App\Domain\Entity\House;
 use App\Domain\Entity\User;
 
 class RamUserRepository implements IUserRepository {
@@ -17,6 +15,16 @@ class RamUserRepository implements IUserRepository {
   public function findById(string $id): ?User {
     foreach ($this->database as $user) {
       if ($user->getId() === $id) {
+        return $this->copy($user);
+      }
+    }
+
+    return null;
+  }
+
+  public function findByEmailAddress(string $emailAddress): ?User {
+    foreach ($this->database as $user) {
+      if ($user->getEmailAddress() === $emailAddress) {
         return $this->copy($user);
       }
     }

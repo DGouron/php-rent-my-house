@@ -16,6 +16,10 @@ class SqlUserRepository extends ServiceEntityRepository implements IUserReposito
     return $this->find($id);
   }
 
+  public function findByEmailAddress(string $emailAddress): ?User {
+    return $this->findOneBy(['emailAddress' => $emailAddress]);
+  }
+
   public function save(User $user) {
     $this->getEntityManager()->persist($user);
   }
