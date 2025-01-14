@@ -12,7 +12,6 @@ class House {
   public function __construct(string $id, string $ownerId) {
     $this->id = $id;
     $this->ownerId = $ownerId;
-
   }
 
   public function getId(): string {

@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Application\Controller;
 
 use App\Application\Commands\AcceptReservation\AcceptReservationCommand;
 use App\Application\Commands\RefuseReservation\RefuseReservationCommand;
 use App\Application\Commands\ReserveHouse\ReserveHouseCommand;
+use App\Application\Queries\ListPendingReservations\ListPendingReservationsQuery;
 use App\Lib\AppController;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,5 +24,10 @@ class ReservationController extends AppController {
   #[Route('/api/refuse-reservation', format: "json")]
   public function refuseReservation(#[MapRequestPayload] RefuseReservationCommand $command) {
     return $this->dispatch($command);
+  }
+
+  #[Route('/api/list-pending-reservations', format: "json", methods: ["GET"])]
+  public function listPendingReservations() {
+    return $this->dispatchQuery(new ListPendingReservationsQuery());
   }
 }
