@@ -5,6 +5,7 @@ namespace App\Application\Commands\ReserveHouse;
 use App\Application\Ports\Services\IIdProvider;
 use App\Domain\Entity\Reservation;
 use App\Application\Ports\Repositories\IReservationRepository;
+use App\Libs\IdViewModel;
 use DateTime;
 
 class ReserveHouseCommandHandler {
@@ -18,7 +19,7 @@ class ReserveHouseCommandHandler {
         $this->reservationRepository = $reservationRepository;
     }
 
-    public function execute(ReserveHouseCommand $command): string {
+    public function execute(ReserveHouseCommand $command): IdViewModel {
         $reservation = new Reservation(
             $this->idProvider->getId(), 
             DateTime::createFromFormat("Y-m-d", $command->getStartDate()),
@@ -27,6 +28,6 @@ class ReserveHouseCommandHandler {
 
         $this->reservationRepository->save($reservation);
 
-        return $reservation->getId();
+        return new IdViewModel($reservation->getId());
     }
 }

@@ -36,12 +36,12 @@ class ReserveHouseTest extends TestCase {
         $idProvider = new IdProvider("reservation-id");
 
         $commandHandler = new ReserveHouseCommandHandler($idProvider, $repository);
-        $id =$commandHandler->execute(new ReserveHouseCommand("2024-01-01", "2024-01-02"));
+        $response =$commandHandler->execute(new ReserveHouseCommand("2024-01-01", "2024-01-02"));
 
-        $reservation = $repository->findById($id);
+        $reservation = $repository->findById($response->getId());
 
         $this->assertNotNull($reservation);
-        $this->assertEquals($id, $reservation->getId());
+        $this->assertEquals($response->getId(), $reservation->getId());
 
         $this->assertEquals("2024-01-01", $reservation->getStartDate()->format("Y-m-d"));
         $this->assertEquals("2024-01-02", $reservation->getEndDate()->format("Y-m-d"));
