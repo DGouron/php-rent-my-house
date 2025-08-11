@@ -3,10 +3,12 @@
 namespace App\Application\Commands\ReserveHouse;
 
 class ReserveHouseCommand {
-    public readonly string $startDate;
-    public readonly string $endDate;
+    private readonly string $houseId;
+    private readonly string $startDate;
+    private readonly string $endDate;
 
-    public function __construct(string $startDate, string $endDate) {
+    public function __construct(string $houseId, string $startDate, string $endDate) {
+        $this->houseId = $houseId;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
     }
@@ -17,5 +19,9 @@ class ReserveHouseCommand {
 
     public function getEndDate(): string {
         return $this->endDate;
+    }
+
+    public function getHouseId(): string {
+        return $this->houseId;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libs;
+namespace App\Domain\ViewModel;
 
 class IdViewModel {
    private string $id;
